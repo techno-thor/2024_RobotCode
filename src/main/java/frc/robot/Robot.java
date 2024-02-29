@@ -4,12 +4,16 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.molib.buttons.ButtonManager;
 import frc.molib.dashboard.ChooserManager;
+import frc.robot.period.Autonomous;
 import frc.robot.period.Teleoperated;
+import frc.robot.period.Test;
 import frc.robot.subsystem.Chassis;
 import frc.robot.subsystem.Hanger;
 import frc.robot.subsystem.Runway;
@@ -27,6 +31,8 @@ public class Robot extends TimedRobot {
 	public static final NetworkTable tblPeriod = tblMain.getSubTable("Period");
 	public static final NetworkTable tblSubsystem = tblMain.getSubTable("Subsystem");
 
+	private static UsbCamera camMain;
+
 	@Override
 	public void robotInit() {
 		//Initialize Subsystems
@@ -34,11 +40,22 @@ public class Robot extends TimedRobot {
 		Runway.init();
 		Hanger.init();
 
+		//Setup Driver camera
+        try{
+            camMain = CameraServer.startAutomaticCapture("Main Camera", 0);
+            camMain.setFPS(15);
+            camMain.setResolution(128, 80);
+        } finally {
+            //Just ignore camera if it fails
+        }
+
 		//Wait for NetworkTables connection
 		while(!NetworkTableInstance.getDefault().isConnected());
 
 		//Initialize Dashboard values
+		Autonomous.initDashboard();
 		Teleoperated.initDashboard();
+		Test.initDashboard();
 
 		Chassis.initDashboard();
 		Runway.initDashboard();
@@ -57,10 +74,14 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void autonomousInit() {}
+	public void autonomousInit() {
+		Autonomous.init();
+	}
 
 	@Override
-	public void autonomousPeriodic() {}
+	public void autonomousPeriodic() {
+		Autonomous.periodic();
+	}
 
 	@Override
 	public void teleopInit() {
@@ -79,8 +100,12 @@ public class Robot extends TimedRobot {
 	public void disabledPeriodic() {}
 
 	@Override
-	public void testInit() {}
+	public void testInit() {
+		Test.init();
+	}
 
 	@Override
-	public void testPeriodic() {}
+	public void testPeriodic() {
+		Test.periodic();
+	}
 }

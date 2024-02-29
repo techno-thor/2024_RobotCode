@@ -29,7 +29,7 @@ public class Runway {
     private static final TalonFX mtrReel_B = new TalonFX(7);
 
     //Sensors
-    private static final DigitalInput bmpLoaded = new DigitalInput(0, true);
+    private static final DigitalInput bmpLoaded = new DigitalInput(0, false);
 
     //LEDs
     private static final DigitalLight ledIndicator = new DigitalLight(PneumaticsModuleType.CTREPCM, 0);
@@ -105,7 +105,7 @@ public class Runway {
 
     /** Turn on the Director in reverse */
     public static void reverseDirector() {
-        setDirectorPower(-1.0);
+        setDirectorPower(-0.5);
     }
 
     /** Turn off the Director */
@@ -145,7 +145,7 @@ public class Runway {
 
     /** Trun on the Reels in reverse */
     public static void reverseReels() {
-        setReelPower(-0.5);
+        setReelPower(-0.05);
     }
 
     /** Turn off the Reels */

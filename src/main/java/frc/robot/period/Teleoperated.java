@@ -1,9 +1,7 @@
 package frc.robot.period;
 
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Timer;
 import frc.molib.buttons.Button;
 import frc.molib.buttons.ButtonManager;
 import frc.molib.dashboard.Chooser;
@@ -57,29 +55,37 @@ public class Teleoperated {
     //Parent NetworkTable
     private static final NetworkTable tblTeleoperated = Robot.tblPeriod.getSubTable("Teleoperated");
 
+    //Choosers
     private static Chooser<ChassisPowerScale> chsChassisPowerScale = new Chooser<ChassisPowerScale>(tblTeleoperated, "Chassis Power Scale", ChassisPowerScale.NORMAL);
     private static Chooser<ChassisControlMode> chsChassisControlMode = new Chooser<ChassisControlMode>(tblTeleoperated, "Chassis Control Mode", ChassisControlMode.TANK);
 
+    //Chooser Selections
 	private static ChassisPowerScale mSelectedChassisPowerScale;
 	private static ChassisControlMode mSelectedChassisControlMode;
 
+    //Controllers
     private static final XboxController ctlDriver = new XboxController(0);
     private static final XboxController ctlOperator = new XboxController(1);
 
     //Driver Buttons
-    private static final Button btnDrive_Slow = new Button() { @Override public boolean get() { return ctlDriver.getLeftBumper(); } };
-    private static final Button btnDrive_Boost = new Button() { @Override public boolean get() { return ctlDriver.getRightBumper(); } };
-    private static final Button btnDrive_Brake = new Button() { @Override public boolean get() { return ctlDriver.getLeftTrigger(); } };
-    private static final Button btnHanger_Extend = new Button() { @Override public boolean get() { return ctlDriver.getBButton(); } };
-    private static final Button btnHanger_Retract = new Button() { @Override public boolean get() { return ctlDriver.getAButton(); } };
-    private static final Button btnShoot = new Button() { @Override public boolean get() { return ctlDriver.getRightTrigger(); } };
+    private static final Button btnDrive_Slow = new Button() { @Override public boolean get() { return ctlDriver.getRightBumper(); } };
+    private static final Button btnDrive_Boost = new Button() { @Override public boolean get() { return ctlDriver.getLeftTrigger() || ctlDriver.getRightTrigger(); } };
+    private static final Button btnDrive_Brake = new Button() { @Override public boolean get() { return ctlDriver.getLeftBumper(); } };
+    private static final Button btnAmpShot = new Button() { @Override public boolean get() { return ctlDriver.getPOV() == 180; } };
+    private static final Button btnSpeakerShot = new Button() { @Override public boolean get() { return ctlDriver.getPOV() == 0; } };
 
     //Operator Buttons
-    private static final Button btnReels_SpeakerShot = new Button() { @Override public boolean get() { return ctlOperator.getRightTrigger(); } };
-    private static final Button btnReels_AmpShot = new Button() { @Override public boolean get() { return ctlOperator.getRightBumper(); } };
     private static final Button btnIntake = new Button() { @Override public boolean get() { return ctlOperator.getLeftTrigger(); } };
     private static final Button btnOuttake = new Button() { @Override public boolean get() { return ctlOperator.getXButton(); } };
     private static final Button btnGroundPickUp_Lower = new Button() { @Override public boolean get() { return ctlOperator.getAButton(); } };
+    private static final Button btnHanger_Extend = new Button() { @Override public boolean get() { return ctlOperator.getRightTrigger(); } };
+    private static final Button btnHanger_Retract = new Button() { @Override public boolean get() { return ctlOperator.getRightBumper(); } };
+
+    //Timers
+    private static final Timer tmrShootDelay = new Timer();
+
+    //Constants
+    private static final double SHOOT_DELAY = 0.1;
 
     /** Private constructor to prevent individual instances from being created */
     private Teleoperated() {}
@@ -92,17 +98,16 @@ public class Teleoperated {
         //Get selected options from Dashboard
 		mSelectedChassisPowerScale = chsChassisPowerScale.get();
 		mSelectedChassisControlMode = chsChassisControlMode.get();
+
+        //Start Shoot Delay Timer
+        tmrShootDelay.reset();
+        tmrShootDelay.start();
     }
 
     /** Initialize Dashboard values */
     public static void initDashboard() {
         chsChassisPowerScale.init();
         chsChassisControlMode.init();
-    }
-
-    /** Call regularly to push new values to Dashboard */
-    public static void updateDashboard() {
-
     }
 
 	/**
@@ -151,26 +156,24 @@ public class Teleoperated {
             Chassis.disableBrake();
 
 		//Runway Control
-		if(btnReels_AmpShot.get()) {
+        if(btnAmpShot.get()) {
             Runway.disableLEDs();
             Runway.enableReels_Amp();
-            if(btnShoot.get()) 
-                Runway.enableDirector();
-            else 
-                Runway.disableDirector();
-        } else if(btnReels_SpeakerShot.get()) {
+            if(tmrShootDelay.get() > SHOOT_DELAY) Runway.enableDirector();
+        } else if(btnSpeakerShot.get()) {
             Runway.disableLEDs();
             Runway.enableReels_Speaker();
-            if(btnShoot.get()) 
-                Runway.enableDirector();
-            else 
-                Runway.disableDirector();
+            if(tmrShootDelay.get() > SHOOT_DELAY) Runway.enableDirector();
         } else if(btnIntake.get()) {
             Runway.enableLEDs();
             Runway.reverseReels();
             Runway.reverseDirector();
+
+            tmrShootDelay.reset();
         } else {
             Runway.disable();
+
+            tmrShootDelay.reset();
         }
 
         //Hanger Control
@@ -181,6 +184,7 @@ public class Teleoperated {
         else 
             Hanger.disableWinch();
 
+        //Update Subsystems
         Chassis.periodic();
 		Runway.periodic();
         Hanger.periodic();
