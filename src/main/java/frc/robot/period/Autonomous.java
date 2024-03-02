@@ -156,6 +156,7 @@ public class Autonomous {
                         Robot.disableSubsystems();
                 }
             }},
+        /** Shoot into the Speaker, turn around, and drive forward just enough to cross the Travel line. */
         SPEAKER_SHOT_TRAVEL("Speaker Shot & Travel") {
             @Override public void periodic() {
                 switch(mSelectedStartingPosition){
@@ -278,6 +279,7 @@ public class Autonomous {
                         }
                 }
             }},
+        /** Shoot into the Speaker, turn around, and drive as far across the field as far as possible, ready to go to the Source. */
         SPEAKER_SHOT_FIELD("Speaker Shot & Cross Field"){
             @Override public void periodic() {
                 switch(mSelectedStartingPosition) {
