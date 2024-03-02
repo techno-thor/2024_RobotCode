@@ -33,6 +33,15 @@ public class Robot extends TimedRobot {
 
 	private static UsbCamera camMain;
 
+	/**
+	 * Disable all subsystems. Turn off all motors and sit there.
+	 */
+	public static void disableSubsystems() {
+		Chassis.disable();
+		Runway.disable();
+		Hanger.disable();
+	}
+
 	@Override
 	public void robotInit() {
 		//Initialize Subsystems

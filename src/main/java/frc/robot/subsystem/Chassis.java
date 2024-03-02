@@ -116,6 +116,14 @@ public class Chassis {
 		mtrDrive_R2.setPosition(0.0);
 	}
 
+	/**
+	 * Get whether the distance PID has reached its target
+	 * @return True if on target for target time
+	 */
+	public static boolean isAtDistance() {
+		return pidDrive_Distance.atSetpoint();
+	}
+
 	/** 
 	 * Get the chassis angle since last reset 
 	 * @return Angle turned in degrees
@@ -127,6 +135,14 @@ public class Chassis {
 	/** Reset Gyro angle to 0.0 */
 	public static void resetAngle() {
 		gyrDrive_Angle.reset();
+	}
+
+	/**
+	 * Get whether the angle PID has reached its target
+	 * @return True if on target for target time
+	 */
+	public static boolean isAtAngle() {
+		return pidDrive_Angle.atSetpoint();
 	}
 
 ////Drive
