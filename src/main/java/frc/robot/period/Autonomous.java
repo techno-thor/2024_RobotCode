@@ -374,40 +374,59 @@ public class Autonomous {
                                 if(tmrTimeout.get() > 0.25) mStage++;
                                 break;
                             case 6:
-                                Console.logMsg("Time reached, stopping Runway and driving back 5ft...");
+                                Console.logMsg("Time reached, stopping Runway and driving back 1ft...");
                                 Runway.disable();
                                 Chassis.resetDistance();
-                                Chassis.goToDistance(60.0); //FIXME: Determine if far enough to turn
+                                Chassis.goToDistance(12.0); //FIXME: Determine if far enough to turn
                                 tmrTimeout.reset();
                                 mStage++; break;
                             case 7:
-                                if(Chassis.isAtDistance() || tmrTimeout.get() > 2.5) mStage++;
+                                if(Chassis.isAtDistance() || tmrTimeout.get() > 0.5) mStage++;
                                 break;
                             case 8:
-                                Console.logMsg("Distance reached, stopping drive and turning 130°...");
+                                Console.logMsg("Distance reached, turning 30°...");
                                 Chassis.disablePID_Distance();
                                 Chassis.resetAngle();
-                                Chassis.goToAngle(DriverStation.getAlliance().get() == Alliance.Red ? 130.0 : -130.0); //FIXME: Determine proper angle
+                                Chassis.goToAngle(DriverStation.getAlliance().get() == Alliance.Red ? -30.0 : 30.0); //FIXME: Determine proper angle
                                 tmrTimeout.reset();
                                 mStage++; break;
                             case 9:
                                 if(Chassis.isAtAngle() || tmrTimeout.get() > 1.0) mStage++;
                                 break;
                             case 10:
+                                Console.logMsg("Angle reached, driving back 5ft...");
+                                Chassis.resetDistance();
+                                Chassis.goToDistance(60.0); //FIXME: Determine proper distance
+                                tmrTimeout.reset();
+                                mStage++; break;
+                            case 11:
+                                if(Chassis.isAtDistance() || tmrTimeout.get() > 2.5) mStage++;
+                                break;
+                            case 12:
+                                Console.logMsg("Distance reached, stopping drive and turning 130°...");
+                                Chassis.disablePID_Distance();
+                                Chassis.resetAngle();
+                                Chassis.goToAngle(DriverStation.getAlliance().get() == Alliance.Red ? 130.0 : -130.0); //FIXME: Determine proper angle
+                                tmrTimeout.reset();
+                                mStage++; break;
+                            case 13:
+                                if(Chassis.isAtAngle() || tmrTimeout.get() > 1.0) mStage++;
+                                break;
+                            case 14:
                                 Console.logMsg("Angle reached, stopping turn and driving forward 10ft...");
                                 Chassis.disablePID_Angle();
                                 Chassis.resetDistance();
                                 Chassis.goToDistance(120.0);
                                 tmrTimeout.reset();
                                 mStage++; break;
-                            case 11:
+                            case 15:
                                 if(Chassis.isAtDistance() || tmrTimeout.get() > 5.0) mStage++;
                                 break;
-                            case 12:
+                            case 16:
                                 Console.logMsg("Distance reached, stopping drive...");
                                 Chassis.disable();
                                 mStage++; break;
-                            case 13:
+                            case 17:
                                 Console.logMsg("Sequence Complete");
                                 mStage++; break;
                             default:
